@@ -15,6 +15,10 @@ class RobotInterface(object):
         pass
 
     @abstractmethod
+    def say(self, text, configuration=None):
+        pass
+
+    @abstractmethod
     def stop(self):
         self.walk(0, 0, 0)
 

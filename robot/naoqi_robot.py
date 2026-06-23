@@ -15,6 +15,12 @@ class NaoqiRobot(RobotInterface):
             robot_config.PORT
         )
 
+        self.animated_speech = ALProxy(
+            "ALAnimatedSpeech",
+            ip,
+            robot_config.PORT
+        )
+
         self.posture = ALProxy(
             "ALRobotPosture",
             ip,
@@ -33,29 +39,29 @@ class NaoqiRobot(RobotInterface):
 
         self.ball_detector = BallDetector()
 
-    def move(self, x, y, theta):
+    def move(self, x, y, theta, max_step_x=0.06, max_step_y=0.1, max_step_theta=0.2, step_height=0.015):
         self.motion.moveTo(
             x,
             y,
             theta,
             [
-                ["MaxStepX", 0.03],
-                ["MaxStepY", 0.02],
-                ["MaxStepTheta", 0.2],
-                ["StepHeight", 0.015]
+                ["MaxStepX", max_step_x],
+                ["MaxStepY", max_step_y],
+                ["MaxStepTheta", max_step_theta],
+                ["StepHeight", step_height]
             ]
         )
 
-    def move_toward(self, x, y, theta):
+    def move_toward(self, x, y, theta, max_step_x=0.06, max_step_y=0.1, max_step_theta=0.2, step_height=0.015):
         self.motion.moveToward(
             x,
             y,
             theta,
             [
-                ["MaxStepX", 0.08],
-                ["MaxStepY", 0.1],
-                ["MaxStepTheta", 0.2],
-                ["StepHeight", 0.015]
+                ["MaxStepX", max_step_x],
+                ["MaxStepY", max_step_y],
+                ["MaxStepTheta", max_step_theta],
+                ["StepHeight", step_height]
             ]
         )
     
@@ -113,6 +119,14 @@ class NaoqiRobot(RobotInterface):
         pitch = math.atan2(z, x)
 
         self.motion.setAngles(["HeadYaw", "HeadPitch"], [yaw, pitch], 0.2)
+
+    def say(self, text, configuration=None):
+        if configuration is None:
+            configuration = {
+                "bodyLanguageMode": "contextual"
+            }
+
+        self.animated_speech.say(text, configuration)
 
     def stop(self):
         self.walk(0, 0, 0)

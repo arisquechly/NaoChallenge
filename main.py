@@ -36,16 +36,16 @@ try:
     }
 
     while not robot.mem.getData("Device/SubDeviceList/ChestBoard/Button/Sensor/Value"):
-        right_hand = robot.mem.getData("Device/SubDeviceList/Head/Touch/Front/Sensor/Value")
+        head_front = robot.mem.getData("Device/SubDeviceList/Head/Touch/Front/Sensor/Value")
 
         head = robot.mem.getData("Device/SubDeviceList/Head/Touch/Middle/Sensor/Value")
         head_back = robot.mem.getData("Device/SubDeviceList/Head/Touch/Rear/Sensor/Value")
             
-        if right_hand:
+        if head_front:
             selected_action = "kick_right"
             animated_speech.say("Estado patear derecho seleccionado", configuration)
-            search_ball_behavior.run()
-            walk_to_ball_behavior.run(True, "right")
+            #search_ball_behavior.run()
+            #walk_to_ball_behavior.run(True, "right")
             kick_behavior.run()
             robot.stop()
         elif head:
