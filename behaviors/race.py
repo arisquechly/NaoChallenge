@@ -26,7 +26,7 @@ class Race:
 
         intial_yaw = mem.getData("Device/SubDeviceList/InertialSensor/AngleZ/Sensor/Value")
         start_time =  time.time()
-        while time.time() - start_time < 5 and not self.robot.mem.getData("Device/SubDeviceList/ChestBoard/Button/Sensor/Value"):
+        while time.time() - start_time < 18 and not self.robot.mem.getData("Device/SubDeviceList/ChestBoard/Button/Sensor/Value"):
             print(time.time() - start_time)
             yaw = mem.getData("Device/SubDeviceList/InertialSensor/AngleZ/Sensor/Value") - intial_yaw
             print("El yaw es: " + str(yaw))

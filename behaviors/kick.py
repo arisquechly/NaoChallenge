@@ -1,70 +1,40 @@
-import robot_config
+from controllers.pid import PID
+from robot.robot_interface import RobotInterface
 import time
-import math
-import motion
+import robot_config
+from naoqi import ALProxy
 
 class Kick:
-    def __init__(self, robot):
+
+    def __init__(
+        self,
+        robot,
+        distance_x=3,
+        distance_y=0.0,
+    ):  
         self.robot = robot
+        self.distance_x = distance_x
+        self.distance_y = distance_y
+
+        self.robot.start_moving()
 
     def run(self):
+        self.robot.motion.wakeUp()
+        self.robot.posture.goToPosture("StandInit", 0.5)
+        
+        mem = ALProxy("ALMemory", robot_config.IP_ADDRESS, robot_config.PORT)
 
-        proxy = self.robot.motion
+        intial_yaw = mem.getData("Device/SubDeviceList/InertialSensor/AngleZ/Sensor/Value")
+        start_time =  time.time()
+        while time.time() - start_time < 4 and not self.robot.mem.getData("Device/SubDeviceList/ChestBoard/Button/Sensor/Value"):
+            print(time.time() - start_time)
+            yaw = mem.getData("Device/SubDeviceList/InertialSensor/AngleZ/Sensor/Value") - intial_yaw
+            print("El yaw es: " + str(yaw))
+            theta_error = 0 - yaw
 
-        # Rigidez y postura inicial
-        robot_config.StiffnessOn(proxy)
-        robot_config.PoseInit(proxy)
+            print("iniciando carrera")
+            self.robot.move_toward(1, -0.8, theta_error * -0.5, max_step_x=0.1, max_step_y=0.1, max_step_theta=0.5, step_height=0.03)
 
-        # Activar Whole Body Balancer
-        proxy.wbEnable(True)
 
-        # Ambos pies fijos
-        proxy.wbFootState("Fixed", "Legs")
-
-        # Restricciones de balance
-        proxy.wbEnableBalanceConstraint(True, "Legs")
-
-        # Transferir peso a la pierna izquierda
-        proxy.wbGoToBalance("LLeg", 4.0)
-
-        time.sleep(1.0)
-
-        # Liberar pierna derecha
-        proxy.wbFootState("Free", "RLeg")
-
-        effectorName = "RLeg"
-        space = motion.FRAME_TORSO
-        axisMask = 63
-
-        targetList = [
-            [-0.03, 0.00, 0.02, 0.00, 0.05, 0.00],
-            [ 0.05, 0.00, 0.01, 0.00, 0.00, 0.00],
-            [ 0.00, 0.00, 0.01, 0.00, 0.00, 0.00],
-            [ 0.00, 0.00, 0.00, 0.00, 0.00, 0.00]
-        ]
-
-        times = [1.0, 1.2, 1.6, 2.0]
-
-        proxy.positionInterpolation(
-            effectorName,
-            space,
-            targetList,
-            axisMask,
-            times,
-            False
-        )
-
-        # Esperar estabilidad
-        time.sleep(4)
-
-        # Recuperar equilibrio
-        proxy.wbGoToBalance("Legs", 1.5)
-
-        # Fijar nuevamente ambos pies
-        proxy.wbFootState("Fixed", "Legs")
-
-        # Desactivar Whole Body
-        proxy.wbEnable(False)
-
-        # Volver a postura inicial
-        robot_config.PoseInit(proxy)
+        
+            
